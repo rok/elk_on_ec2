@@ -1,0 +1,17 @@
+---
+ 
+- name: Create iam role
+  iam:
+    iam_type: role
+    name: "{{ iam_role }}"
+    state: present
+  tags: provision
+
+- name: Create iam policy
+  iam_policy:
+    iam_type: role
+    iam_name: "{{ iam_role }}"
+    policy_name: "{{ iam_role }}"
+    state: present
+    policy_document: "{{ iam_policy_file }}"
+  tags: provision

@@ -1,0 +1,5 @@
+---
+
+# project: projectname
+# region: us-east-1
+# keyfile: ~/.ssh/id_rsa
