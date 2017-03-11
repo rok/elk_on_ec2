@@ -8,7 +8,7 @@
   tags: provision
 
   roles:
-    - provision_ec2
+    - {role: provision_ec2, node_name: node0 }
 
   post_tasks:
     - name: Refresh EC2 inventory
@@ -16,43 +16,48 @@
 
     - meta: refresh_inventory
 
-# - name: Install and configure snowplow.
-#   hosts: "tag_Project_{{ project }}:&tag_Name_{{ node_type }}"
-#   connection: ssh
-#   become: yes
-#   gather_facts: no
-#   vars_files:
-#     - "group_vars/all"
-#   tags: install
+- name: Install and configure master elasticsearch node.
+  hosts: "tag_Project_{{ project }}:&tag_Name_node0"
+  connection: ssh
+  gather_facts: no
+  become: yes
+  vars_files:
+    - "group_vars/all"
+  tags: install
 
-#   - name: Elasticsearch with custom configuration
-#     hosts: localhost
-#     roles:
-#       #expand to all available parameters
-#       - { role: elasticsearch, es_instance_name: "node1", es_data_dirs: "/opt/elasticsearch/data", es_log_dir: "/opt/elasticsearch/logs", 
-#       es_config: {
-#           node.name: "node1", 
-#           cluster.name: "custom-cluster", 
-#           discovery.zen.ping.unicast.hosts: "localhost:9301", 
-#           http.port: 9201, 
-#           transport.tcp.port: 9301, 
-#           node.data: false, 
-#           node.master: true, 
-#           bootstrap.memory_lock: true, 
-#           } 
-#       }
-#     vars:
-#       es_scripts: false
-#       es_templates: false
-#       es_version_lock: false
-#       es_heap_size: 1g
-#       es_scripts: false
-#       es_templates: false
-#       es_version_lock: false
-#       es_start_service: false
-#       es_plugins_reinstall: false
-#       es_api_port:9201
-#       es_plugins:
-#           - plugin: ingest-geoip
-#             proxy_host: proxy.example.com
-#             proxy_port: 8080
+  pre_tasks:
+    - name: Install python2 in raw mode
+      raw: sudo apt-get install -y python
+
+- name: Install and configure master elasticsearch node.
+  hosts: "tag_Project_{{ project }}:&tag_Name_node0"
+  connection: ssh
+  become: yes
+  vars:
+    es_scripts: false
+    es_templates: false
+    es_version_lock: false
+    es_heap_size: 1g
+    es_api_port: 9200
+  vars_files:
+    - "group_vars/all"
+  tags: install
+
+  roles:
+    #expand to all available parameters
+    - { role: elasticsearch, es_instance_name: "node0", es_data_dirs: "/opt/elasticsearch/data", es_log_dir: "/opt/elasticsearch/logs", 
+    es_config: {
+        node.name: "node0", 
+        cluster.name: "{{ cluster_name }}",
+        discovery.zen.ping.unicast.hosts: "localhost:9301",
+        http.port: 9200,
+        transport.tcp.port: 9301,
+        node.data: true,
+        node.master: true,
+        bootstrap.memory_lock: true,
+        } 
+    }
+    - role: kibana
+
+
+
