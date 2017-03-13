@@ -47,10 +47,11 @@
     #expand to all available parameters
     - { role: elasticsearch, es_instance_name: "node0", es_data_dirs: "/opt/elasticsearch/data", es_log_dir: "/opt/elasticsearch/logs", 
     es_config: {
-        node.name: "node0", 
+        node.name: "node0",
         cluster.name: "{{ cluster_name }}",
         discovery.zen.ping.unicast.hosts: "localhost:9301",
         http.port: 9200,
+        network.host: _site_,
         transport.tcp.port: 9301,
         node.data: true,
         node.master: true,
@@ -60,8 +61,8 @@
     - role: kibana
     - role: antoiner77.caddy
       caddy_config: |
-        c.youstar.org {
-          tls some.email@gmail.com
+        {{ inventory_hostname }}:443 {
+          tls self_signed
           basicauth / kibana kibanapass
           proxy / localhost:5601 {
             header_upstream Host {host}
