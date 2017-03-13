@@ -58,6 +58,16 @@
         } 
     }
     - role: kibana
-
-
-
+    - role: antoiner77.caddy
+      caddy_config: |
+        c.youstar.org {
+          tls some.email@gmail.com
+          basicauth / kibana kibanapass
+          proxy / localhost:5601 {
+            header_upstream Host {host}
+            header_upstream X-Real-IP {remote}
+            header_upstream X-Forwarded-Proto {scheme}
+            websocket
+          }
+        }
+      tags: caddy
